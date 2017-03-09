@@ -17,6 +17,9 @@ const styles = {
   },
   allPadding: {
     margin: '2rem',
+  },
+  rightAlignedText: {
+    textAlign: 'right',
   }
 }
 
@@ -190,6 +193,7 @@ class App extends Component {
             <input
               ref="giving"
               type="number"
+              style={styles.rightAlignedText}
               value={giving}
               onChange={this.changedGiving}
             />
@@ -199,6 +203,7 @@ class App extends Component {
             <input
               ref="budget"
               type="number"
+              style={styles.rightAlignedText}
               value={budget}
               onChange={this.changedBudget}
             />
