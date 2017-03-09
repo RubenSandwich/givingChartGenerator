@@ -5,6 +5,8 @@ import Canvas from 'react-canvas-component';
 function drawCanvas({ctx, time}, props) {
   const { width, height } = ctx.canvas;
   const { year, month, giving, budget } = props;
+  const givingNum = parseInt(giving, 10);
+  const budgetNum = parseInt(budget, 10);
 
   ctx.clearRect(0, 0, width, height);
 
@@ -20,13 +22,13 @@ function drawCanvas({ctx, time}, props) {
   const maxWidth = 250;
 
   let smallerWidth;
-  let givingGreater;
-  if (giving > budget) {
+  let givingGreater = false;
+  if (givingNum > budgetNum) {
     givingGreater = true;
-    smallerWidth = (budget / giving) * maxWidth;
+    smallerWidth = (budgetNum / givingNum) * maxWidth;
   } else {
     givingGreater = false;
-    smallerWidth = (giving / budget) * maxWidth;
+    smallerWidth = (givingNum / budgetNum) * maxWidth;
   }
 
   // Giving Box //
