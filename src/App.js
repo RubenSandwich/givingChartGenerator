@@ -31,8 +31,34 @@ class App extends Component {
       budget: 20000,
       errorMessage: "",
     };
+
+    this.changedYear = this.changedYear.bind(this);
+    this.changedMonth = this.changedMonth.bind(this);
+    this.changedGiving = this.changedGiving.bind(this);
+    this.changedBudget = this.changedBudget.bind(this);
+    this.saveGraph = this.saveGraph.bind(this);
   }
 
+  changedYear(event) {
+    this.setState({year: event.target.value});
+  }
+
+  changedMonth(event) {
+    this.setState({month: event.target.value});
+  }
+
+  changedGiving(event) {
+    this.setState({giving: event.target.value});
+  }
+
+  changedBudget(event) {
+    this.setState({budget: event.target.value});
+  }
+
+  saveGraph(event) {
+    const imageData = this.refs.givingChart.getImageData();
+    this.refs.downloadButton.href = imageData;
+  }
 
   render() {
     const {
@@ -59,7 +85,7 @@ class App extends Component {
         <button
           style={styles.allPadding}
           disabled
-          class="button-primary"
+          className="button-primary"
         >
           Save Chart
         </button>
@@ -69,17 +95,26 @@ class App extends Component {
         <div style={styles.leftRightPadding}>
           <GivingChart
             ref="givingChart"
+            year={year}
+            month={month}
+            giving={giving}
+            budget={budget}
           />
         </div>
       );
 
+      const downloadTitle = `${month} ${year} Giving Chart`;
       saveButton = (
-        <button
+        <a
+          ref="downloadButton"
+          href="#"
+          download={downloadTitle}
           style={styles.allPadding}
-          class="button-primary"
+          onClick={this.saveGraph}
+          className="button button-primary"
         >
           Save Chart
-        </button>
+        </a>
       );
     }
 
@@ -89,7 +124,10 @@ class App extends Component {
         <div style={styles.rowContainer}>
           <div style={styles.leftRightPadding}>
             <label>Month</label>
-            <select ref="month" value={month}>
+            <select
+              value={month}
+              onChange={this.changedMonth}
+            >
               <option value="January">January</option>
               <option value="February">February</option>
               <option value="March">March</option>
@@ -106,7 +144,10 @@ class App extends Component {
           </div>
           <div style={styles.leftRightPadding}>
             <label>Year</label>
-            <select ref="year" value={year}>
+            <select
+              value={year}
+              onChange={this.changedYear}
+            >
               <option value="2025">2025</option>
               <option value="2024">2024</option>
               <option value="2023">2023</option>
@@ -122,11 +163,21 @@ class App extends Component {
         <div style={styles.rowContainer}>
           <div style={styles.leftRightPadding}>
             <label>Giving</label>
-            <input type="number" ref="giving" value={giving}/>
+            <input
+              ref="giving"
+              type="number"
+              value={giving}
+              onChange={this.changedGiving}
+            />
           </div>
           <div style={styles.leftRightPadding}>
             <label>Budget</label>
-            <input type="number" ref="budget" value={budget}/>
+            <input
+              ref="budget"
+              type="number"
+              value={budget}
+              onChange={this.changedBudget}
+            />
           </div>
         </div>
         {errorBox}
