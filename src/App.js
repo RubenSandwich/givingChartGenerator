@@ -27,10 +27,12 @@ class App extends Component {
     this.state = {
       year: "2017",
       month: "January",
-      giving: 10000,
-      budget: 20000,
-      errorMessage: "",
+      giving: 3,
+      budget: 20,
+      errorMessages: [],
     };
+
+    this.checkForErrors = this.checkForErrors.bind(this);
 
     this.changedYear = this.changedYear.bind(this);
     this.changedMonth = this.changedMonth.bind(this);
@@ -47,12 +49,34 @@ class App extends Component {
     this.setState({month: event.target.value});
   }
 
+  checkForErrors(error, value) {
+    const { errorMessages } = this.state;
+
+    if (value <= 0) {
+      if (!errorMessages.includes(error)) {
+        this.setState({
+          errorMessages: [...errorMessages, error],
+        });
+      }
+    } else {
+      this.setState({
+        errorMessages: errorMessages.filter((item) => {
+          return item !== error;
+        })
+      });
+    }
+  }
+
   changedGiving(event) {
-    this.setState({giving: event.target.value});
+    const value = event.target.value;
+    this.checkForErrors('Giving cannot be 0 or negative', value);
+    this.setState({giving: value});
   }
 
   changedBudget(event) {
-    this.setState({budget: event.target.value});
+    const value = event.target.value;
+    this.checkForErrors('Budget cannot be 0 or negative', value);
+    this.setState({budget: value});
   }
 
   saveGraph(event) {
@@ -66,17 +90,17 @@ class App extends Component {
       month,
       giving,
       budget,
-      errorMessage,
+      errorMessages,
     } = this.state;
 
     let errorBox;
     let graph;
     let saveButton;
-    if (errorMessage) {
+    if (errorMessages.length !== 0) {
       errorBox = (
         <pre style={styles.leftRightPadding}>
           <code>
-            {errorMessage}
+            {errorMessages.join('\n')}
           </code>
         </pre>
       );
