@@ -30,8 +30,8 @@ class App extends Component {
     this.state = {
       year: "2017",
       month: "January",
-      giving: 3,
-      budget: 20,
+      giving: 312346,
+      budget: 208790,
       errorMessages: [],
     };
 

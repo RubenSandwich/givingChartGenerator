@@ -2,17 +2,38 @@
 import React, { Component } from 'react';
 import Canvas from 'react-canvas-component';
 
-function drawCanvas({ctx, time}, props) {
+
+function drawCanvas({ ctx, time }, props) {
   const { width, height } = ctx.canvas;
   const { year, month, giving, budget } = props;
   const givingNum = parseInt(giving, 10);
   const budgetNum = parseInt(budget, 10);
 
-  ctx.clearRect(0, 0, width, height);
-
   // Titles //
-  ctx.fillStyle= '#000';
-  ctx.font = '30px Arial';
+  ctx.font = '24px Quattrocento Sans';
+
+
+  // Generate char widths needed to simulate proportional figures
+  const numsChars = '$1234567890,'
+  const numCharWidths = numsChars.split('').reduce((result, item) => {
+    result[item] =  ctx.measureText(item).width;
+    return result;
+  }, {});
+
+  const longestNumWidth = Object.keys(numCharWidths).reduce((result, item) => {
+    return result > numCharWidths[item] ? result : numCharWidths[item];
+  }, 0);
+
+  const wordWidths = ['Giving', 'Budget'].reduce((result, item) => {
+    result[item] =  ctx.measureText(item).width;
+    return result;
+  }, {});
+
+  console.log(numCharWidths);
+  console.log(longestNumWidth);
+  console.log(wordWidths);
+
+  ctx.fillStyle = '#000';
   ctx.fillText(year, 20, 40);
   ctx.fillText(month, 20, 100);
 
@@ -30,6 +51,7 @@ function drawCanvas({ctx, time}, props) {
     givingGreater = false;
     smallerWidth = (givingNum / budgetNum) * maxWidth;
   }
+
 
   // Giving Box //
   // Box
@@ -67,7 +89,7 @@ class GivingChart extends Component {
   }
 
   render() {
-    const width = 400;
+    const width = 300;
     const height = 200;
 
     return (
@@ -77,7 +99,9 @@ class GivingChart extends Component {
           height,
         }}
         ref="chart"
-        draw={(args) => { drawCanvas(args, this.props) }}
+        draw={(args) => {
+          drawCanvas(args, this.props);
+        }}
         width={width * 2}
         height={height * 2}
       />
