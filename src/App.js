@@ -30,8 +30,8 @@ class App extends Component {
     this.state = {
       year: "2017",
       month: "January",
-      giving: 312346,
-      budget: 208790,
+      giving: 13,
+      budget: 20,
       errorMessages: [],
     };
 
@@ -71,13 +71,13 @@ class App extends Component {
   }
 
   changedGiving(event) {
-    const value = event.target.value;
+    const value = parseInt(event.target.value, 10);
     this.checkForErrors('Giving cannot be 0 or negative', value);
     this.setState({giving: value});
   }
 
   changedBudget(event) {
-    const value = event.target.value;
+    const value = parseInt(event.target.value, 10);
     this.checkForErrors('Budget cannot be 0 or negative', value);
     this.setState({budget: value});
   }
