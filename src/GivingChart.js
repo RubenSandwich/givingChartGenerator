@@ -3,18 +3,9 @@ import React, { Component } from 'react';
 import Canvas from 'react-canvas-component';
 
 
-function drawCanvas({ ctx, time }, props) {
-  const { width, height } = ctx.canvas;
-  const { year, month, giving, budget } = props;
-  const givingNum = parseInt(giving, 10);
-  const budgetNum = parseInt(budget, 10);
-
-  // Titles //
-  ctx.font = '24px Quattrocento Sans';
-
-
-  // Generate char widths needed to simulate proportional figures
-  const numsChars = '$1234567890,'
+function drawTabularFigures({ ctx, x, y, nextLineOffset }, giving, budget) {
+  // Generate char widths needed to simulate tabular figures
+  const numsChars = '$1234567890,.'
   const numCharWidths = numsChars.split('').reduce((result, item) => {
     result[item] =  ctx.measureText(item).width;
     return result;
@@ -24,62 +15,112 @@ function drawCanvas({ ctx, time }, props) {
     return result > numCharWidths[item] ? result : numCharWidths[item];
   }, 0);
 
+  ctx.fillStyle = '#000';
+
+  let xOffset = 0;
+  const givingStr = `$${giving.toLocaleString()}`;
+  const budgetStr = `$${budget.toLocaleString()}`;
+
+  // Draw Giving String //
+  // Adjust xOffset to line up budget and giving lines
+  if (givingStr.length < budgetStr.length) {
+    const diff = budgetStr.length - givingStr.length;
+    xOffset = diff * longestNumWidth;
+  } else {
+    xOffset = 0;
+  }
+  givingStr.split('').forEach((figure) => {
+    let charOffset = (longestNumWidth - numCharWidths[figure]) / 2;
+
+    ctx.fillText(figure, x + xOffset + charOffset, y);
+    xOffset += longestNumWidth;
+  });
+
+  // Draw Budget String //
+  // Adjust xOffset to line up budget and giving lines
+  if (givingStr.length > budgetStr.length) {
+    const diff = givingStr.length - budgetStr.length;
+    xOffset = diff * longestNumWidth;
+  } else {
+    xOffset = 0;
+  }
+  budgetStr.split('').forEach((figure) => {
+    let charOffset = (longestNumWidth - numCharWidths[figure]) / 2;
+
+    ctx.fillText(figure, x + xOffset + charOffset, y + nextLineOffset);
+    xOffset += longestNumWidth;
+  });
+}
+
+function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget) {
+  const maxBoxWidth = 250;
+  const boxHeight = 100;
+
   const wordWidths = ['Giving', 'Budget'].reduce((result, item) => {
     result[item] =  ctx.measureText(item).width;
     return result;
   }, {});
 
-  console.log(numCharWidths);
-  console.log(longestNumWidth);
-  console.log(wordWidths);
+  let budgetBoxWith;
+  let givingBoxWidth;
+  let smallestItem;
+  let smallestWidth;
+  if (giving < budget) {
+    givingBoxWidth = (giving / budget) * maxBoxWidth;
+    budgetBoxWith = maxBoxWidth;
+
+    smallestItem = 'Giving';
+    smallestWidth = givingBoxWidth;
+  } else {
+    givingBoxWidth = maxBoxWidth;
+    budgetBoxWith = (budget / giving) * maxBoxWidth;
+
+    smallestItem = 'Budget';
+    smallestWidth = budgetBoxWith;
+  }
+
+  let textOffset = 30;
+
+  let blackBudgetText = false;
+  if ((textOffset + wordWidths[smallestItem] + 10) >= smallestWidth) {
+    textOffset += smallestWidth;
+    if (smallestItem === 'Budget') {
+      blackBudgetText = true;
+    }
+  }
+
+  // Giving Box //
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(x, y, givingBoxWidth, boxHeight);
+  // Text for Box
+  ctx.fillStyle = '#000';
+  ctx.fillText('Giving', textOffset, y + (boxHeight / 2));
+
+  // Budget Box //
+  const budgetBoxY = y + boxHeight + nextLineOffset;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(x, budgetBoxY, budgetBoxWith, boxHeight);
+  // Text for Box
+  ctx.fillStyle =  blackBudgetText ? '#000' : '#FFF';
+  ctx.fillText('Budget', textOffset, budgetBoxY + (boxHeight / 2));
+}
+
+function drawCanvas({ ctx, time }, props) {
+  const { width, height } = ctx.canvas;
+  const { year, month, giving, budget } = props;
+
+  ctx.clearRect(0, 0, width, height);
+
+  // Titles //
+  ctx.font = '24px Quattrocento Sans';
 
   ctx.fillStyle = '#000';
   ctx.fillText(year, 20, 40);
   ctx.fillText(month, 20, 100);
 
-  // TODO: Remove magic numbers, refactor into functions
-  // TODO: Move giving below budget if it's greater
-  // TODO: If too small draw label outside of box
-  const maxWidth = 250;
-
-  let smallerWidth;
-  let givingGreater = false;
-  if (givingNum > budgetNum) {
-    givingGreater = true;
-    smallerWidth = (budgetNum / givingNum) * maxWidth;
-  } else {
-    givingGreater = false;
-    smallerWidth = (givingNum / budgetNum) * maxWidth;
-  }
-
-
-  // Giving Box //
-  // Box
-  ctx.strokeStyle= '#000';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(20, 140, givingGreater ? maxWidth : smallerWidth, 100);
-
-  // Text inside Box
-  ctx.fillStyle= '#000';
-  ctx.fillText('giving', 60, 200);
-
-  // Text after box
-  ctx.fillStyle= '#000';
-  ctx.fillText(giving, 280, 200);
-
-
-  // Budget Box //
-  // Box
-  ctx.fillStyle= '#000';
-  ctx.fillRect(20, 250, givingGreater ? smallerWidth : maxWidth, 100);
-
-  // Text inside Box
-  ctx.fillStyle= '#FFF';
-  ctx.fillText('budget', 60, 40 + 250);
-
-  // Text after box
-  ctx.fillStyle= '#000';
-  ctx.fillText(budget, 280, 40 + 250);
+  drawBoxes({ctx, x: 20, y: 150, nextLineOffset: 20}, giving, budget)
+  drawTabularFigures({ctx, x: 280, y: 200, nextLineOffset: 90}, giving, budget);
 }
 
 class GivingChart extends Component {
@@ -95,8 +136,8 @@ class GivingChart extends Component {
     return (
       <Canvas
         style={{
-          width,
-          height,
+          width: width,
+          height: height,
         }}
         ref="chart"
         draw={(args) => {
