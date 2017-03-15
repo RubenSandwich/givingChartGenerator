@@ -23,6 +23,14 @@ const styles = {
   }
 }
 
+function isEmpty(str) {
+  return (!str || 0 === str.length);
+}
+
+function liberalParseInt(value) {
+  return isEmpty(value) ? 0 : parseInt(value, 10);
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -71,14 +79,14 @@ class App extends Component {
   }
 
   changedGiving(event) {
-    const value = parseInt(event.target.value, 10);
-    this.checkForErrors('Giving cannot be 0 or negative', value);
+    const value = liberalParseInt(event.target.value, 10);
+    this.checkForErrors('Giving cannot be 0', value);
     this.setState({giving: value});
   }
 
   changedBudget(event) {
-    const value = parseInt(event.target.value, 10);
-    this.checkForErrors('Budget cannot be 0 or negative', value);
+    const value = liberalParseInt(event.target.value, 10);
+    this.checkForErrors('Budget cannot be 0', value);
     this.setState({budget: value});
   }
 
