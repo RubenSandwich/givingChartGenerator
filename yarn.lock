@@ -4160,10 +4160,6 @@ rc@~1.1.6:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-canvas-component@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/react-canvas-component/-/react-canvas-component-0.1.1.tgz#1287548e0d7598d35e09a331305b2c8c65e74327"
-
 react-dev-utils@^0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-0.5.2.tgz#50d0b962d3a94b6c2e8f2011ed6468e4124bc410"

@@ -1,6 +1,5 @@
 
 import React, { Component } from 'react';
-import Canvas from 'react-canvas-component';
 
 
 function drawTabularFigures({ ctx, x, givingBoxTextY, budgetBoxTextY }, giving, budget) {
@@ -132,7 +131,7 @@ function drawTitle({ctx, x, y, nextLineOffset, fontSize}, year, month) {
   }
 }
 
-function drawCanvas({ ctx, time }, props) {
+function drawCanvas({ ctx }, props) {
   const { width, height } = ctx.canvas;
   const { year, month, giving, budget } = props;
 
@@ -182,27 +181,37 @@ function drawCanvas({ ctx, time }, props) {
 }
 
 class GivingChart extends Component {
+  width = 330;
+  height = 173;
+
   getImageData() {
-    const canvas = this.refs.chart.refs.canvas;
+    const canvas = this.refs.canvas;
     return canvas.toDataURL("image/png");
   }
 
-  render() {
-    const width = 330;
-    const height = 173;
+  componentDidMount() {
+    this.updateCanvas();
+  }
 
+  componentDidUpdate() {
+    this.updateCanvas();
+  }
+
+  updateCanvas() {
+    const ctx = this.refs.canvas.getContext('2d');
+    drawCanvas({ ctx }, this.props)
+  }
+
+  render() {
     return (
-      <Canvas
+      <canvas
+        ref="canvas"
         style={{
-          width: width,
-          height: height,
+          width: this.width,
+          height: this.height,
         }}
-        ref="chart"
-        draw={(args) => {
-          drawCanvas(args, this.props);
-        }}
-        width={width * 2}
-        height={height * 2}
+        width={this.width * 2}
+        height={this.height * 2}
       />
     );
   }
