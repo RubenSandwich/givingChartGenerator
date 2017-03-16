@@ -102,8 +102,18 @@ function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget) {
   // Budget Box //
   const budgetBoxY = y + boxHeight + nextLineOffset;
   const budgetBoxTextY = budgetBoxY + textOffsetY;
-  ctx.fillStyle = '#000';
-  ctx.fillRect(x, budgetBoxY, budgetBoxWith, boxHeight);
+
+  // Stroke if a small line as stroke always draws
+  // something while fill does not
+  if (budgetBoxWith < 1) {
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, budgetBoxY, budgetBoxWith, boxHeight);
+  } else {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x, budgetBoxY, budgetBoxWith, boxHeight);
+  }
+
   // Text for Box
   ctx.fillStyle =  blackBudgetText ? '#000' : '#FFF';
   ctx.fillText('Budget', textOffsetX, budgetBoxTextY);

@@ -86,10 +86,10 @@ class App extends Component {
     this.setState({month: event.target.value});
   }
 
-  checkForErrors(error, value) {
+  checkForErrors(error, value, max) {
     const { errorMessages } = this.state;
 
-    if (value <= 0) {
+    if (value <= max) {
       if (!errorMessages.includes(error)) {
         this.setState({
           errorMessages: [...errorMessages, error],
@@ -106,13 +106,11 @@ class App extends Component {
 
   changedGiving(event) {
     const value = liberalParseInt(event.target.value, 10);
-    this.checkForErrors('Giving cannot be 0', value);
     this.setState({giving: value});
   }
 
   changedBudget(event) {
     const value = liberalParseInt(event.target.value, 10);
-    this.checkForErrors('Budget cannot be 0', value);
     this.setState({budget: value});
   }
 
