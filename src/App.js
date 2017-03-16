@@ -31,13 +31,39 @@ function liberalParseInt(value) {
   return isEmpty(value) ? 0 : parseInt(value, 10);
 }
 
+function range(start, count) {
+  return Array.apply(0, Array(count))
+    .map(function (element, index) {
+      return index + start;
+  });
+}
+
 class App extends Component {
+  months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  currentDate = new Date();
+  currentYear = this.currentDate.getFullYear().toString();
+  currentMonth = this.months[this.currentDate.getMonth()];
+
   constructor(props) {
     super(props);
 
     this.state = {
-      year: "2017",
-      month: "January",
+      year: this.currentYear,
+      month: this.currentMonth,
       giving: 13,
       budget: 20,
       errorMessages: [],
@@ -163,18 +189,16 @@ class App extends Component {
               value={month}
               onChange={this.changedMonth}
             >
-              <option value="January">January</option>
-              <option value="February">February</option>
-              <option value="March">March</option>
-              <option value="April">April</option>
-              <option value="May">May</option>
-              <option value="June">June</option>
-              <option value="July">July</option>
-              <option value="August">August</option>
-              <option value="September">September</option>
-              <option value="October">October</option>
-              <option value="November">November</option>
-              <option value="December">December</option>
+              {this.months.map((month, index) => {
+                return (
+                  <option
+                    value={`${month}`}
+                    key={index}
+                  >
+                    {month}
+                  </option>
+                );
+              })}
             </select>
           </div>
           <div style={styles.leftRightPadding}>
@@ -183,15 +207,17 @@ class App extends Component {
               value={year}
               onChange={this.changedYear}
             >
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
-              <option value="2021">2021</option>
-              <option value="2020">2020</option>
-              <option value="2019">2019</option>
-              <option value="2018">2018</option>
-              <option value="2017">2017</option>
+              {range(0, 10).map((num, index) => {
+                const dateValue = this.currentDate.getFullYear() + num;
+                return (
+                  <option
+                    value={`${dateValue}`}
+                    key={index}
+                  >
+                    {dateValue}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>
