@@ -18,7 +18,8 @@ const styles = {
   allPadding: {
     margin: '2rem',
   },
-  rightAlignedText: {
+  numInput: {
+    width: '158px',
     textAlign: 'right',
   }
 }
@@ -89,7 +90,7 @@ class App extends Component {
   checkForErrors(error, value, max) {
     const { errorMessages } = this.state;
 
-    if (value <= max) {
+    if (value >= max) {
       if (!errorMessages.includes(error)) {
         this.setState({
           errorMessages: [...errorMessages, error],
@@ -106,11 +107,13 @@ class App extends Component {
 
   changedGiving(event) {
     const value = liberalParseInt(event.target.value, 10);
+    this.checkForErrors('Giving does not support values above a billion', value, 1000000000);
     this.setState({giving: value});
   }
 
   changedBudget(event) {
     const value = liberalParseInt(event.target.value, 10);
+    this.checkForErrors('Budget does not support values above a billion', value, 1000000000);
     this.setState({budget: value});
   }
 
@@ -225,8 +228,9 @@ class App extends Component {
             <input
               ref="giving"
               type="number"
-              style={styles.rightAlignedText}
+              style={styles.numInput}
               value={giving}
+              min={0}
               onChange={this.changedGiving}
             />
           </div>
@@ -235,8 +239,9 @@ class App extends Component {
             <input
               ref="budget"
               type="number"
-              style={styles.rightAlignedText}
+              style={styles.numInput}
               value={budget}
+              min={0}
               onChange={this.changedBudget}
             />
           </div>
