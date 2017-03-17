@@ -146,7 +146,7 @@ class App extends Component {
           disabled
           className="button-primary"
         >
-          Save Chart
+          Download Chart
         </button>
       );
     } else {
@@ -172,7 +172,7 @@ class App extends Component {
           onClick={this.saveGraph}
           className="button button-primary"
         >
-          Save Chart
+          Download Chart
         </a>
       );
     }
