@@ -2,6 +2,12 @@
 import React, { Component } from 'react';
 
 
+const styles = {
+  allPadding: {
+    margin: '1rem 10px',
+  },
+}
+
 function drawTabularFigures({ ctx, x, givingBoxTextY, budgetBoxTextY }, giving, budget) {
   // Generate char widths needed to simulate tabular figures
   const numsChars = '$1234567890,.'
@@ -213,16 +219,28 @@ class GivingChart extends Component {
   }
 
   render() {
+    const scale = 2;
+    const ppi = 300;
+
+    // parseFloat to drop the extra 0's
+    const widthPrint = parseFloat(((this.width * scale) / ppi).toFixed(2));
+    const heightPrint = parseFloat(((this.height * scale) / ppi).toFixed(2));
+
     return (
-      <canvas
-        ref="canvas"
-        style={{
-          width: this.width,
-          height: this.height,
-        }}
-        width={this.width * 2}
-        height={this.height * 2}
-      />
+      <div>
+        <canvas
+          ref="canvas"
+          style={{
+            width: this.width,
+            height: this.height,
+          }}
+          width={this.width * scale}
+          height={this.height * scale}
+        />
+        <p style={styles.allPadding}>
+          {`Note: Chart is meant to ${widthPrint}″ wide by ${heightPrint}″ high in print.`}
+        </p>
+      </div>
     );
   }
 }
