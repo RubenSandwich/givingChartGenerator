@@ -107,13 +107,11 @@ class App extends Component {
 
   changedGiving(event) {
     const value = liberalParseInt(event.target.value, 10);
-    this.checkForErrors('Giving does not support values above a billion', value, 1000000000);
     this.setState({giving: value});
   }
 
   changedBudget(event) {
     const value = liberalParseInt(event.target.value, 10);
-    this.checkForErrors('Budget does not support values above a billion', value, 1000000000);
     this.setState({budget: value});
   }
 
