@@ -1,5 +1,4 @@
-
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
 import GivingChart from './GivingChart.js';
 
@@ -21,11 +20,11 @@ const styles = {
   numInput: {
     width: '158px',
     textAlign: 'right',
-  }
-}
+  },
+};
 
 function isEmpty(str) {
-  return (!str || 0 === str.length);
+  return !str || 0 === str.length;
 }
 
 function liberalParseInt(value) {
@@ -33,9 +32,8 @@ function liberalParseInt(value) {
 }
 
 function range(start, count) {
-  return Array.apply(0, Array(count))
-    .map(function (element, index) {
-      return index + start;
+  return Array.apply(0, Array(count)).map(function(element, index) {
+    return index + start;
   });
 }
 
@@ -88,7 +86,7 @@ class App extends Component {
   }
 
   checkForErrors(error, value, max) {
-    const { errorMessages } = this.state;
+    const {errorMessages} = this.state;
 
     if (value >= max) {
       if (!errorMessages.includes(error)) {
@@ -98,9 +96,9 @@ class App extends Component {
       }
     } else {
       this.setState({
-        errorMessages: errorMessages.filter((item) => {
+        errorMessages: errorMessages.filter(item => {
           return item !== error;
-        })
+        }),
       });
     }
   }
@@ -142,11 +140,7 @@ class App extends Component {
       );
 
       saveButton = (
-        <button
-          style={styles.allPadding}
-          disabled
-          className="button-primary"
-        >
+        <button style={styles.allPadding} disabled className="button-primary">
           Download Chart
         </button>
       );
@@ -184,16 +178,10 @@ class App extends Component {
         <div style={styles.rowContainer}>
           <div style={styles.leftRightPadding}>
             <label>Month</label>
-            <select
-              value={month}
-              onChange={this.changedMonth}
-            >
+            <select value={month} onChange={this.changedMonth}>
               {this.months.map((month, index) => {
                 return (
-                  <option
-                    value={`${month}`}
-                    key={index}
-                  >
+                  <option value={`${month}`} key={index}>
                     {month}
                   </option>
                 );
@@ -202,17 +190,11 @@ class App extends Component {
           </div>
           <div style={styles.leftRightPadding}>
             <label>Year</label>
-            <select
-              value={year}
-              onChange={this.changedYear}
-            >
+            <select value={year} onChange={this.changedYear}>
               {range(0, 10).map((num, index) => {
                 const dateValue = this.currentDate.getFullYear() + num;
                 return (
-                  <option
-                    value={`${dateValue}`}
-                    key={index}
-                  >
+                  <option value={`${dateValue}`} key={index}>
                     {dateValue}
                   </option>
                 );
