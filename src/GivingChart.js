@@ -1,30 +1,30 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 const styles = {
   allPadding: {
-    margin: "1rem 10px"
-  }
+    margin: '1rem 10px',
+  },
 };
 
 function drawTitle({ ctx, x, y, nextLineOffset, fontSize }, year, month) {
-  ctx.fillStyle = "#000";
-  const previousFont = ctx.font.replace(/"/g, "");
+  ctx.fillStyle = '#000';
+  const previousFont = ctx.font.replace(/"/g, '');
 
   ctx.font = `${previousFont} Bold`;
-  ctx.fillText("Financial Update", x, y);
+  ctx.fillText('Financial Update', x, y);
 
   ctx.font = previousFont;
   ctx.fillText(`Fiscal YTD - ${month} ${year}`, x, y + nextLineOffset);
 
   return {
     x,
-    y: y + nextLineOffset
+    y: y + nextLineOffset,
   };
 }
 
 function calculateNumSpacing(ctx, giving, budget) {
-  const numsChars = "$1234567890,.";
-  const numCharWidths = numsChars.split("").reduce((result, item) => {
+  const numsChars = '$1234567890,.';
+  const numCharWidths = numsChars.split('').reduce((result, item) => {
     result[item] = ctx.measureText(item).width;
     return result;
   }, {});
@@ -35,7 +35,7 @@ function calculateNumSpacing(ctx, giving, budget) {
 
   const calculateStrWidths = (result, figure, index) => {
     let width;
-    if (figure === "$" || figure === "," || figure === ".") {
+    if (figure === '$' || figure === ',' || figure === '.') {
       width = numCharWidths[figure];
     } else {
       width = longestNumWidth;
@@ -48,9 +48,9 @@ function calculateNumSpacing(ctx, giving, budget) {
 
       offset += previousOffset;
       if (
-        previousFigure === "$" ||
-        previousFigure === "," ||
-        previousFigure === "."
+        previousFigure === '$' ||
+        previousFigure === ',' ||
+        previousFigure === '.'
       ) {
         offset += numCharWidths[previousFigure];
       } else {
@@ -61,18 +61,18 @@ function calculateNumSpacing(ctx, giving, budget) {
     return result.concat({
       figure,
       offset,
-      width
+      width,
     });
   };
 
   const givingStr = `$${giving.toLocaleString()}`;
-  const givingStrWidths = givingStr.split("").reduce(calculateStrWidths, []);
+  const givingStrWidths = givingStr.split('').reduce(calculateStrWidths, []);
   const givingStrTotalWidth = givingStrWidths.reduce((result, item) => {
     return result + item.width;
   }, 0);
 
   const budgetStr = `$${budget.toLocaleString()}`;
-  const budgetStrWidths = budgetStr.split("").reduce(calculateStrWidths, []);
+  const budgetStrWidths = budgetStr.split('').reduce(calculateStrWidths, []);
   const budgetStrTotalWidth = budgetStrWidths.reduce((result, item) => {
     return result + item.width;
   }, 0);
@@ -83,14 +83,14 @@ function calculateNumSpacing(ctx, giving, budget) {
     givingStrWidths,
     budgetStrWidths,
     givingStrTotalWidth,
-    budgetStrTotalWidth
+    budgetStrTotalWidth,
   };
 }
 
 function drawTabularFigures(
   { ctx, x, givingBoxTextY, budgetBoxTextY },
   giving,
-  budget
+  budget,
 ) {
   const {
     longestNumWidth,
@@ -98,14 +98,14 @@ function drawTabularFigures(
     givingStrWidths,
     budgetStrWidths,
     givingStrTotalWidth,
-    budgetStrTotalWidth
+    budgetStrTotalWidth,
   } = calculateNumSpacing(ctx, giving, budget);
 
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = '#000';
 
   const drawFigureWithSpacing = (item, xOffset, yOffset) => {
     let charOffset = 0;
-    if (item.figure !== "$" && item.figure !== "," && item.figure !== ".") {
+    if (item.figure !== '$' && item.figure !== ',' && item.figure !== '.') {
       charOffset = (longestNumWidth - numCharWidths[item.figure]) / 2;
     }
 
@@ -143,7 +143,7 @@ function drawTabularFigures(
 function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget, maxBoxWidth) {
   const boxHeight = 90;
 
-  const wordWidths = ["Giving", "Budget"].reduce((result, item) => {
+  const wordWidths = ['Giving', 'Budget'].reduce((result, item) => {
     result[item] = ctx.measureText(item).width;
     return result;
   }, {});
@@ -156,13 +156,13 @@ function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget, maxBoxWidth) {
     givingBoxWidth = giving / budget * maxBoxWidth;
     budgetBoxWidth = maxBoxWidth;
 
-    smallestItem = "Giving";
+    smallestItem = 'Giving';
     smallestWidth = givingBoxWidth;
   } else {
     givingBoxWidth = maxBoxWidth;
     budgetBoxWidth = budget / giving * maxBoxWidth;
 
-    smallestItem = "Budget";
+    smallestItem = 'Budget';
     smallestWidth = budgetBoxWidth;
   }
 
@@ -171,20 +171,20 @@ function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget, maxBoxWidth) {
   let blackBudgetText = false;
   if (textOffsetX + wordWidths[smallestItem] + x / 2 >= smallestWidth) {
     textOffsetX += smallestWidth;
-    if (smallestItem === "Budget") {
+    if (smallestItem === 'Budget') {
       blackBudgetText = true;
     }
   }
 
   // Giving Box //
-  ctx.strokeStyle = "#000";
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = 2;
   const textOffsetY = boxHeight * 0.7;
   const givingBoxTextY = y + textOffsetY;
   ctx.strokeRect(x, y, givingBoxWidth, boxHeight);
   // Text for Box
-  ctx.fillStyle = "#000";
-  ctx.fillText("Giving", textOffsetX, givingBoxTextY);
+  ctx.fillStyle = '#000';
+  ctx.fillText('Giving', textOffsetX, givingBoxTextY);
 
   // Budget Box //
   const budgetBoxY = y + boxHeight + nextLineOffset;
@@ -193,23 +193,23 @@ function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget, maxBoxWidth) {
   // Stroke if a small line as stroke always draws
   // something while fill does not
   if (budgetBoxWidth < 1) {
-    ctx.strokeStyle = "#000";
+    ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.strokeRect(x, budgetBoxY, budgetBoxWidth, boxHeight);
   } else {
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = '#000';
     ctx.fillRect(x, budgetBoxY, budgetBoxWidth, boxHeight);
   }
 
   // Text for Box
-  ctx.fillStyle = blackBudgetText ? "#000" : "#FFF";
-  ctx.fillText("Budget", textOffsetX, budgetBoxTextY);
+  ctx.fillStyle = blackBudgetText ? '#000' : '#FFF';
+  ctx.fillText('Budget', textOffsetX, budgetBoxTextY);
 
   const boxEndSpacing = x * 2.25;
   return {
     boxsEndX: maxBoxWidth + boxEndSpacing,
     givingBoxTextY,
-    budgetBoxTextY
+    budgetBoxTextY,
   };
 }
 
@@ -230,10 +230,10 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
       x: graphMargins,
       y: fontSize,
       nextLineOffset: fontSize + 3,
-      fontSize
+      fontSize,
     },
     year,
-    month
+    month,
   );
 
   const boxesFinish = drawBoxes(
@@ -241,11 +241,11 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
       ctx,
       x: graphMargins,
       y: titleFinish.y + elementSpacing * 3,
-      nextLineOffset: elementSpacing
+      nextLineOffset: elementSpacing,
     },
     giving,
     budget,
-    maxBoxWidth
+    maxBoxWidth,
   );
 
   drawTabularFigures(
@@ -253,17 +253,17 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
       ctx,
       x: boxesFinish.boxsEndX,
       givingBoxTextY: boxesFinish.givingBoxTextY,
-      budgetBoxTextY: boxesFinish.budgetBoxTextY
+      budgetBoxTextY: boxesFinish.budgetBoxTextY,
     },
     giving,
-    budget
+    budget,
   );
 }
 
 function expectedGraphWidth(props, maxBoxWidth, graphMargins, font, scale) {
   const { year, month, giving, budget } = props;
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
   ctx.font = `${font.size}px ${font.family}`;
 
   const boxEndSpacing = graphMargins * 2.5;
@@ -272,7 +272,7 @@ function expectedGraphWidth(props, maxBoxWidth, graphMargins, font, scale) {
   const { givingStrTotalWidth, budgetStrTotalWidth } = calculateNumSpacing(
     ctx,
     giving,
-    budget
+    budget,
   );
 
   const letterWidth = Math.max(givingStrTotalWidth, budgetStrTotalWidth);
@@ -288,7 +288,7 @@ function expectedGraphWidth(props, maxBoxWidth, graphMargins, font, scale) {
 class GivingChart extends Component {
   font = {
     size: 48,
-    family: "Quattrocento Sans"
+    family: 'Quattrocento Sans',
   };
   maxBoxWidth = 380;
   graphMargins = 20;
@@ -296,7 +296,7 @@ class GivingChart extends Component {
 
   getImageData() {
     const canvas = this.refs.canvas;
-    return canvas.toDataURL("image/png");
+    return canvas.toDataURL('image/png');
   }
 
   componentDidMount() {
@@ -310,15 +310,15 @@ class GivingChart extends Component {
   updateCanvas() {
     const { props, maxBoxWidth, graphMargins, font } = this;
 
-    const ctx = this.refs.canvas.getContext("2d");
+    const ctx = this.refs.canvas.getContext('2d');
     drawCanvas(
       {
-        ctx
+        ctx,
       },
       props,
       maxBoxWidth,
       graphMargins,
-      font
+      font,
     );
   }
 
@@ -333,7 +333,7 @@ class GivingChart extends Component {
       maxBoxWidth,
       graphMargins,
       font,
-      scale
+      scale,
     );
 
     // parseFloat to drop the extra 0's
@@ -346,7 +346,7 @@ class GivingChart extends Component {
           ref="canvas"
           style={{
             width,
-            height
+            height,
           }}
           width={width * scale}
           height={height * scale}
