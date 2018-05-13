@@ -14,11 +14,14 @@ function drawTitle({ ctx, x, y, nextLineOffset, fontSize }, year, month) {
   ctx.fillText('Financial Update', x, y);
 
   ctx.font = previousFont;
-  ctx.fillText(`Fiscal YTD - ${month} ${year}`, x, y + nextLineOffset);
+  const fiscalString = `Fiscal YTD - ${month} ${year}`;
+  const fiscalStringWidth = ctx.measureText(fiscalString).width;
+  ctx.fillText(fiscalString, x, y + nextLineOffset);
 
   return {
     x,
     y: y + nextLineOffset,
+    fiscalStringWidth,
   };
 }
 
@@ -87,130 +90,139 @@ function calculateNumSpacing(ctx, giving, budget) {
   };
 }
 
-function drawTabularFigures(
-  { ctx, x, givingBoxTextY, budgetBoxTextY },
+// function drawTabularFigures(
+//   { ctx, x, givingBoxTextY, budgetBoxTextY },
+//   giving,
+//   budget,
+// ) {
+//   const {
+//     longestNumWidth,
+//     numCharWidths,
+//     givingStrWidths,
+//     budgetStrWidths,
+//     givingStrTotalWidth,
+//     budgetStrTotalWidth,
+//   } = calculateNumSpacing(ctx, giving, budget);
+
+//   ctx.fillStyle = '#000';
+
+//   const drawFigureWithSpacing = (item, xOffset, yOffset) => {
+//     let charOffset = 0;
+//     if (item.figure !== '$' && item.figure !== ',' && item.figure !== '.') {
+//       charOffset = (longestNumWidth - numCharWidths[item.figure]) / 2;
+//     }
+
+//     const totalOffset = xOffset + x + item.offset + charOffset;
+//     ctx.fillText(item.figure, totalOffset, yOffset);
+//   };
+
+//   // Draw Giving String //
+//   // Adjust xOffset to line up budget and giving lines
+//   givingStrWidths.forEach(item => {
+//     let xOffset;
+//     if (givingStrTotalWidth < budgetStrTotalWidth) {
+//       xOffset = budgetStrTotalWidth - givingStrTotalWidth;
+//     } else {
+//       xOffset = 0;
+//     }
+
+//     drawFigureWithSpacing(item, xOffset, givingBoxTextY);
+//   });
+
+//   // Draw Budget String //
+//   // Adjust xOffset to line up budget and giving lines
+//   budgetStrWidths.forEach(item => {
+//     let xOffset;
+//     if (budgetStrTotalWidth < givingStrTotalWidth) {
+//       xOffset = givingStrTotalWidth - budgetStrTotalWidth;
+//     } else {
+//       xOffset = 0;
+//     }
+
+//     drawFigureWithSpacing(item, xOffset, budgetBoxTextY);
+//   });
+// }
+
+function drawGraphs(
+  { ctx, x, y, nextLineOffset },
   giving,
   budget,
+  maxBoxWidth,
 ) {
-  const {
-    longestNumWidth,
-    numCharWidths,
-    givingStrWidths,
-    budgetStrWidths,
-    givingStrTotalWidth,
-    budgetStrTotalWidth,
-  } = calculateNumSpacing(ctx, giving, budget);
+  const barHeight = 40;
+  const barSpacing = 5;
 
-  ctx.fillStyle = '#000';
+  const givingRatio = giving / budget;
+  const shortfall = budget - giving;
 
-  const drawFigureWithSpacing = (item, xOffset, yOffset) => {
-    let charOffset = 0;
-    if (item.figure !== '$' && item.figure !== ',' && item.figure !== '.') {
-      charOffset = (longestNumWidth - numCharWidths[item.figure]) / 2;
-    }
+  // Giving Bar
+  let givingBarWidth = giving / budget * maxBoxWidth;
 
-    const totalOffset = xOffset + x + item.offset + charOffset;
-    ctx.fillText(item.figure, totalOffset, yOffset);
-  };
-
-  // Draw Giving String //
-  // Adjust xOffset to line up budget and giving lines
-  givingStrWidths.forEach(item => {
-    let xOffset;
-    if (givingStrTotalWidth < budgetStrTotalWidth) {
-      xOffset = budgetStrTotalWidth - givingStrTotalWidth;
-    } else {
-      xOffset = 0;
-    }
-
-    drawFigureWithSpacing(item, xOffset, givingBoxTextY);
-  });
-
-  // Draw Budget String //
-  // Adjust xOffset to line up budget and giving lines
-  budgetStrWidths.forEach(item => {
-    let xOffset;
-    if (budgetStrTotalWidth < givingStrTotalWidth) {
-      xOffset = givingStrTotalWidth - budgetStrTotalWidth;
-    } else {
-      xOffset = 0;
-    }
-
-    drawFigureWithSpacing(item, xOffset, budgetBoxTextY);
-  });
-}
-
-function drawBoxes({ ctx, x, y, nextLineOffset }, giving, budget, maxBoxWidth) {
-  const boxHeight = 90;
-
-  const wordWidths = ['Giving', 'Budget'].reduce((result, item) => {
-    result[item] = ctx.measureText(item).width;
-    return result;
-  }, {});
-
-  let budgetBoxWidth;
-  let givingBoxWidth;
-  let smallestItem;
-  let smallestWidth;
-  if (giving < budget) {
-    givingBoxWidth = giving / budget * maxBoxWidth;
-    budgetBoxWidth = maxBoxWidth;
-
-    smallestItem = 'Giving';
-    smallestWidth = givingBoxWidth;
-  } else {
-    givingBoxWidth = maxBoxWidth;
-    budgetBoxWidth = budget / giving * maxBoxWidth;
-
-    smallestItem = 'Budget';
-    smallestWidth = budgetBoxWidth;
+  // Always show a little Giving Bar
+  if (givingRatio < 0.01) {
+    givingBarWidth = barSpacing;
   }
 
-  let textOffsetX = 30;
-
-  let blackBudgetText = false;
-  if (textOffsetX + wordWidths[smallestItem] + x / 2 >= smallestWidth) {
-    textOffsetX += smallestWidth;
-    if (smallestItem === 'Budget') {
-      blackBudgetText = true;
-    }
-  }
-
-  // Giving Box //
-  ctx.strokeStyle = '#000';
   ctx.lineWidth = 2;
-  const textOffsetY = boxHeight * 0.7;
-  const givingBoxTextY = y + textOffsetY;
-  ctx.strokeRect(x, y, givingBoxWidth, boxHeight);
-  // Text for Box
-  ctx.fillStyle = '#000';
-  ctx.fillText('Giving', textOffsetX, givingBoxTextY);
-
-  // Budget Box //
-  const budgetBoxY = y + boxHeight + nextLineOffset;
-  const budgetBoxTextY = budgetBoxY + textOffsetY;
-
-  // Stroke if a small line as stroke always draws
-  // something while fill does not
-  if (budgetBoxWidth < 1) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, budgetBoxY, budgetBoxWidth, boxHeight);
+  ctx.strokeStyle = '#000';
+  if (shortfall > 0) {
+    ctx.strokeRect(x, y, givingBarWidth, barHeight);
   } else {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(x, budgetBoxY, budgetBoxWidth, boxHeight);
+    const overhang = 10;
+    ctx.strokeRect(x, y, maxBoxWidth + overhang, barHeight);
   }
 
-  // Text for Box
-  ctx.fillStyle = blackBudgetText ? '#000' : '#FFF';
-  ctx.fillText('Budget', textOffsetX, budgetBoxTextY);
+  // Shortfall Bar
+  const shortfallBarX = x + barSpacing + givingBarWidth;
+  const shortfallBarWidth = maxBoxWidth - givingBarWidth - barSpacing;
 
-  const boxEndSpacing = x * 2.25;
-  return {
-    boxsEndX: maxBoxWidth + boxEndSpacing,
-    givingBoxTextY,
-    budgetBoxTextY,
-  };
+  if (shortfall > 0) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(shortfallBarX, y, shortfallBarWidth, barHeight);
+  }
+
+  // Bottom Bar
+  const bottomBarY = y + barHeight + barSpacing;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(x, bottomBarY, maxBoxWidth, barHeight);
+
+  const graphTickWidth = 3;
+  const cutHeight = barHeight / 2 - barSpacing / 2;
+  const bottomCutY = bottomBarY + barHeight - cutHeight;
+  const leftCutX = x + graphTickWidth;
+
+  // Draw cuts in bottom bar
+  if (shortfall > 0) {
+    const middleGraphTickSpacing = (barSpacing - graphTickWidth) / 2;
+
+    // 1. Giving Bar Cuts
+    const leftCutWidth =
+      givingBarWidth - graphTickWidth + middleGraphTickSpacing;
+
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(leftCutX, bottomBarY, leftCutWidth, cutHeight);
+
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(leftCutX, bottomCutY, leftCutWidth, cutHeight);
+
+    // 2. Shortfall Bar Cuts
+    const rightCutX = leftCutX + leftCutWidth + graphTickWidth;
+    const rightCutWidth =
+      shortfallBarWidth - graphTickWidth + middleGraphTickSpacing;
+
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(rightCutX, bottomBarY, rightCutWidth, cutHeight);
+
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(rightCutX, bottomCutY, rightCutWidth, cutHeight);
+  } else {
+    const cutWidth = maxBoxWidth - graphTickWidth * 2;
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(leftCutX, bottomBarY, cutWidth, cutHeight);
+
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(leftCutX, bottomCutY, cutWidth, cutHeight);
+  }
 }
 
 function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
@@ -236,27 +248,15 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
     month,
   );
 
-  const boxesFinish = drawBoxes(
+  drawGraphs(
     {
       ctx,
       x: graphMargins,
       y: titleFinish.y + elementSpacing * 3,
-      nextLineOffset: elementSpacing,
     },
     giving,
     budget,
-    maxBoxWidth,
-  );
-
-  drawTabularFigures(
-    {
-      ctx,
-      x: boxesFinish.boxsEndX,
-      givingBoxTextY: boxesFinish.givingBoxTextY,
-      budgetBoxTextY: boxesFinish.budgetBoxTextY,
-    },
-    giving,
-    budget,
+    titleFinish.fiscalStringWidth,
   );
 }
 
