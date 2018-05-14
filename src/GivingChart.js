@@ -144,7 +144,7 @@ function calculateNumSpacing(ctx, giving, budget) {
 // }
 
 function drawGraphs(
-  { ctx, x, y, nextLineOffset },
+  { ctx, x, y, nextLineOffset, fontSize },
   giving,
   budget,
   maxBoxWidth,
@@ -170,6 +170,14 @@ function drawGraphs(
   } else {
     const overhang = 10;
     ctx.strokeRect(x, y, maxBoxWidth + overhang, barHeight);
+
+    const overPlusTextX = x + maxBoxWidth + overhang + barSpacing;
+    // Divided by 4 because font is 2x scaled
+    const overPlusTextY = y + barHeight / 2 + fontSize / 4;
+
+    ctx.fontSize = fontSize;
+    ctx.fillStyle = '#000';
+    ctx.fillText('+', overPlusTextX, overPlusTextY);
   }
 
   // Shortfall Bar
@@ -253,6 +261,7 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
       ctx,
       x: graphMargins,
       y: titleFinish.y + elementSpacing * 3,
+      fontSize,
     },
     giving,
     budget,
