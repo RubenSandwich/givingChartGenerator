@@ -94,7 +94,7 @@ function drawGraphs({ ctx, x, y, fontSize }, giving, budget, maxBoxWidth) {
   }
 
   // Bottom Bar
-  const bottomBarY = shortfallBarY + barHeight + barSpacing;
+  const bottomBarY = shortfallBarY + barHeight + barSpacing * 1.5;
   ctx.fillStyle = '#000';
   ctx.fillRect(x - 1, bottomBarY, maxBoxWidth + 1, barHeight);
 
@@ -152,7 +152,7 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
   ctx.clearRect(0, 0, width, height);
 
   const fontSize = font.size;
-  const elementSpacing = 48;
+  const elementSpacing = 40;
 
   ctx.font = `${fontSize}px ${font.family}`;
 
@@ -262,11 +262,9 @@ class GivingChart extends Component {
           width={width * scale}
           height={height * scale}
         />
-        <br />
         <p style={styles.allPadding}>
           {`Note: Chart is meant to be ${widthPrint}″ wide by ${heightPrint}″ high in print`}
         </p>
-        <br />
       </div>
     );
   }
