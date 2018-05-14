@@ -72,12 +72,14 @@ function drawGraphs({ ctx, x, y, fontSize }, giving, budget, maxBoxWidth) {
     const overhang = 10;
     ctx.strokeRect(x, givingBarY, maxBoxWidth + overhang, barHeight);
 
+    const overPlusTextfontSize = fontSize * 2;
     const overPlusTextX = x + maxBoxWidth + overhang + barSpacing;
     // Divided by 4 because font is 2x scaled
-    const overPlusTextY = givingBarY + barHeight / 2 + fontSize / 4;
+    const overPlusTextY = givingBarY + barHeight / 2 + overPlusTextfontSize / 4;
 
     // ctx.fontSize = fontSize;
     ctx.fillStyle = '#000';
+    ctx.font = ctx.font.replace(/\d+px/, `${overPlusTextfontSize}px`);
     ctx.fillText('+', overPlusTextX, overPlusTextY);
   }
 
@@ -98,8 +100,9 @@ function drawGraphs({ ctx, x, y, fontSize }, giving, budget, maxBoxWidth) {
 
   const budgetTextX = x + maxBoxWidth + barSpacing;
   // Divided by 4 because font is 2x scaled
-  const budgetTextY = bottomBarY + barHeight / 2 + fontSize / 4;
+  const budgetTextY = bottomBarY + barHeight / 2 + fontSize / 4 + 2;
 
+  ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`);
   ctx.fillStyle = '#000';
   ctx.fillText(`Budget $${budget.toLocaleString()}`, budgetTextX, budgetTextY);
 
