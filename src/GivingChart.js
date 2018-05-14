@@ -25,137 +25,38 @@ function drawTitle({ ctx, x, y, nextLineOffset, fontSize }, year, month) {
   };
 }
 
-function calculateNumSpacing(ctx, giving, budget) {
-  const numsChars = '$1234567890,.';
-  const numCharWidths = numsChars.split('').reduce((result, item) => {
-    result[item] = ctx.measureText(item).width;
-    return result;
-  }, {});
-
-  const longestNumWidth = Object.keys(numCharWidths).reduce((result, item) => {
-    return result > numCharWidths[item] ? result : numCharWidths[item];
-  }, 0);
-
-  const calculateStrWidths = (result, figure, index) => {
-    let width;
-    if (figure === '$' || figure === ',' || figure === '.') {
-      width = numCharWidths[figure];
-    } else {
-      width = longestNumWidth;
-    }
-
-    let offset = 0;
-    if (index !== 0) {
-      let previousFigure = result[index - 1].figure;
-      let previousOffset = result[index - 1].offset;
-
-      offset += previousOffset;
-      if (
-        previousFigure === '$' ||
-        previousFigure === ',' ||
-        previousFigure === '.'
-      ) {
-        offset += numCharWidths[previousFigure];
-      } else {
-        offset += longestNumWidth;
-      }
-    }
-
-    return result.concat({
-      figure,
-      offset,
-      width,
-    });
-  };
-
-  const givingStr = `$${giving.toLocaleString()}`;
-  const givingStrWidths = givingStr.split('').reduce(calculateStrWidths, []);
-  const givingStrTotalWidth = givingStrWidths.reduce((result, item) => {
-    return result + item.width;
-  }, 0);
-
-  const budgetStr = `$${budget.toLocaleString()}`;
-  const budgetStrWidths = budgetStr.split('').reduce(calculateStrWidths, []);
-  const budgetStrTotalWidth = budgetStrWidths.reduce((result, item) => {
-    return result + item.width;
-  }, 0);
-
-  return {
-    numCharWidths,
-    longestNumWidth,
-    givingStrWidths,
-    budgetStrWidths,
-    givingStrTotalWidth,
-    budgetStrTotalWidth,
-  };
-}
-
-// function drawTabularFigures(
-//   { ctx, x, givingBoxTextY, budgetBoxTextY },
-//   giving,
-//   budget,
-// ) {
-//   const {
-//     longestNumWidth,
-//     numCharWidths,
-//     givingStrWidths,
-//     budgetStrWidths,
-//     givingStrTotalWidth,
-//     budgetStrTotalWidth,
-//   } = calculateNumSpacing(ctx, giving, budget);
-
-//   ctx.fillStyle = '#000';
-
-//   const drawFigureWithSpacing = (item, xOffset, yOffset) => {
-//     let charOffset = 0;
-//     if (item.figure !== '$' && item.figure !== ',' && item.figure !== '.') {
-//       charOffset = (longestNumWidth - numCharWidths[item.figure]) / 2;
-//     }
-
-//     const totalOffset = xOffset + x + item.offset + charOffset;
-//     ctx.fillText(item.figure, totalOffset, yOffset);
-//   };
-
-//   // Draw Giving String //
-//   // Adjust xOffset to line up budget and giving lines
-//   givingStrWidths.forEach(item => {
-//     let xOffset;
-//     if (givingStrTotalWidth < budgetStrTotalWidth) {
-//       xOffset = budgetStrTotalWidth - givingStrTotalWidth;
-//     } else {
-//       xOffset = 0;
-//     }
-
-//     drawFigureWithSpacing(item, xOffset, givingBoxTextY);
-//   });
-
-//   // Draw Budget String //
-//   // Adjust xOffset to line up budget and giving lines
-//   budgetStrWidths.forEach(item => {
-//     let xOffset;
-//     if (budgetStrTotalWidth < givingStrTotalWidth) {
-//       xOffset = givingStrTotalWidth - budgetStrTotalWidth;
-//     } else {
-//       xOffset = 0;
-//     }
-
-//     drawFigureWithSpacing(item, xOffset, budgetBoxTextY);
-//   });
-// }
-
-function drawGraphs(
-  { ctx, x, y, nextLineOffset, fontSize },
-  giving,
-  budget,
-  maxBoxWidth,
-) {
+function drawGraphs({ ctx, x, y, fontSize }, giving, budget, maxBoxWidth) {
   const barHeight = 40;
   const barSpacing = 5;
 
   const givingRatio = giving / budget;
   const shortfall = budget - giving;
 
+  ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`);
+  ctx.font = ctx.font.replace(/\d+Bold/, '');
+
+  // Bar titles
+  const givingX = x - 2;
+  const givingTextY = y;
+
+  ctx.fillStyle = '#000';
+  ctx.fillText(`Giving $${giving.toLocaleString()}`, givingX, givingTextY);
+
+  if (shortfall > 0) {
+    const shortfallTextWidth = ctx.measureText('Shortfall').width;
+    const shortfallX = x + maxBoxWidth - shortfallTextWidth;
+    const shortfallY = y;
+
+    ctx.fillStyle = '#000';
+    ctx.fillText(
+      `Shortfall $${shortfall.toLocaleString()}`,
+      shortfallX,
+      shortfallY,
+    );
+  }
+
   // Giving Bar
+  const givingBarY = y + fontSize / 4 + barSpacing / 2;
   let givingBarWidth = giving / budget * maxBoxWidth;
 
   // Always show a little Giving Bar
@@ -166,33 +67,41 @@ function drawGraphs(
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#000';
   if (shortfall > 0) {
-    ctx.strokeRect(x, y, givingBarWidth, barHeight);
+    ctx.strokeRect(x, givingBarY, givingBarWidth, barHeight);
   } else {
     const overhang = 10;
-    ctx.strokeRect(x, y, maxBoxWidth + overhang, barHeight);
+    ctx.strokeRect(x, givingBarY, maxBoxWidth + overhang, barHeight);
 
     const overPlusTextX = x + maxBoxWidth + overhang + barSpacing;
     // Divided by 4 because font is 2x scaled
-    const overPlusTextY = y + barHeight / 2 + fontSize / 4;
+    const overPlusTextY = givingBarY + barHeight / 2 + fontSize / 4;
 
-    ctx.fontSize = fontSize;
+    // ctx.fontSize = fontSize;
     ctx.fillStyle = '#000';
     ctx.fillText('+', overPlusTextX, overPlusTextY);
   }
 
   // Shortfall Bar
   const shortfallBarX = x + barSpacing + givingBarWidth;
+  const shortfallBarY = givingBarY;
   const shortfallBarWidth = maxBoxWidth - givingBarWidth - barSpacing;
 
   if (shortfall > 0) {
     ctx.fillStyle = '#000';
-    ctx.fillRect(shortfallBarX, y, shortfallBarWidth, barHeight);
+    ctx.fillRect(shortfallBarX, shortfallBarY, shortfallBarWidth, barHeight);
   }
 
   // Bottom Bar
-  const bottomBarY = y + barHeight + barSpacing;
+  const bottomBarY = shortfallBarY + barHeight + barSpacing;
   ctx.fillStyle = '#000';
-  ctx.fillRect(x, bottomBarY, maxBoxWidth, barHeight);
+  ctx.fillRect(x - 1, bottomBarY, maxBoxWidth + 1, barHeight);
+
+  const budgetTextX = x + maxBoxWidth + barSpacing;
+  // Divided by 4 because font is 2x scaled
+  const budgetTextY = bottomBarY + barHeight / 2 + fontSize / 4;
+
+  ctx.fillStyle = '#000';
+  ctx.fillText(`Budget $${budget.toLocaleString()}`, budgetTextX, budgetTextY);
 
   const graphTickWidth = 3;
   const cutHeight = barHeight / 2 - barSpacing / 2;
@@ -208,10 +117,10 @@ function drawGraphs(
       givingBarWidth - graphTickWidth + middleGraphTickSpacing;
 
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(leftCutX, bottomBarY, leftCutWidth, cutHeight);
+    ctx.clearRect(leftCutX, bottomBarY - 1, leftCutWidth, cutHeight + 1);
 
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(leftCutX, bottomCutY, leftCutWidth, cutHeight);
+    ctx.clearRect(leftCutX, bottomCutY, leftCutWidth, cutHeight + 1);
 
     // 2. Shortfall Bar Cuts
     const rightCutX = leftCutX + leftCutWidth + graphTickWidth;
@@ -219,17 +128,17 @@ function drawGraphs(
       shortfallBarWidth - graphTickWidth + middleGraphTickSpacing;
 
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(rightCutX, bottomBarY, rightCutWidth, cutHeight);
+    ctx.clearRect(rightCutX, bottomBarY - 1, rightCutWidth, cutHeight + 1);
 
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(rightCutX, bottomCutY, rightCutWidth, cutHeight);
+    ctx.clearRect(rightCutX, bottomCutY, rightCutWidth, cutHeight + 1);
   } else {
     const cutWidth = maxBoxWidth - graphTickWidth * 2;
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(leftCutX, bottomBarY, cutWidth, cutHeight);
+    ctx.clearRect(leftCutX, bottomBarY - 1, cutWidth, cutHeight + 1);
 
     ctx.fillStyle = '#FFF';
-    ctx.fillRect(leftCutX, bottomCutY, cutWidth, cutHeight);
+    ctx.clearRect(leftCutX, bottomCutY, cutWidth, cutHeight + 1);
   }
 }
 
@@ -240,7 +149,7 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
   ctx.clearRect(0, 0, width, height);
 
   const fontSize = font.size;
-  const elementSpacing = 12;
+  const elementSpacing = 48;
 
   ctx.font = `${fontSize}px ${font.family}`;
 
@@ -256,42 +165,35 @@ function drawCanvas({ ctx }, props, maxBoxWidth, graphMargins, font) {
     month,
   );
 
+  const titleFontWidthOffset = 6;
   drawGraphs(
     {
       ctx,
-      x: graphMargins,
-      y: titleFinish.y + elementSpacing * 3,
-      fontSize,
+      x: graphMargins + titleFontWidthOffset,
+      y: titleFinish.y + elementSpacing,
+      fontSize: fontSize / 2,
     },
     giving,
     budget,
-    titleFinish.fiscalStringWidth,
+    titleFinish.fiscalStringWidth - titleFontWidthOffset,
+    titleFontWidthOffset,
   );
 }
 
 function expectedGraphWidth(props, maxBoxWidth, graphMargins, font, scale) {
-  const { year, month, giving, budget } = props;
+  const { budget } = props;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  ctx.font = `${font.size}px ${font.family}`;
 
-  const boxEndSpacing = graphMargins * 2.5;
-  const boxWidth = graphMargins + maxBoxWidth + boxEndSpacing;
+  ctx.font = `${font.size / 2}px ${font.family}`;
 
-  const { givingStrTotalWidth, budgetStrTotalWidth } = calculateNumSpacing(
-    ctx,
-    giving,
-    budget,
-  );
+  // Calculate the budget box line width
+  const boxWidth = graphMargins + maxBoxWidth;
 
-  const letterWidth = Math.max(givingStrTotalWidth, budgetStrTotalWidth);
+  const budgetStr = `budget $${budget.toLocaleString()}`;
+  const budgetWidth = ctx.measureText(budgetStr).width;
 
-  const title = `Fiscal YTD - ${month} ${year}`;
-  const titleWidth = ctx.measureText(title).width + graphMargins * 2;
-
-  return (
-    Math.max(boxWidth + letterWidth, titleWidth) / (scale != null ? scale : 1)
-  );
+  return (boxWidth + budgetWidth) / scale;
 }
 
 class GivingChart extends Component {
@@ -299,9 +201,9 @@ class GivingChart extends Component {
     size: 48,
     family: 'Quattrocento Sans',
   };
-  maxBoxWidth = 380;
+  maxBoxWidth = 500;
   graphMargins = 20;
-  height = 173;
+  height = 125;
 
   getImageData() {
     const canvas = this.refs.canvas;
@@ -353,10 +255,7 @@ class GivingChart extends Component {
       <div>
         <canvas
           ref="canvas"
-          style={{
-            width,
-            height,
-          }}
+          style={{ width, height }}
           width={width * scale}
           height={height * scale}
         />
